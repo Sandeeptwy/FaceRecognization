@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition Payment</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to right, rgba(0, 128, 255, 0.6), rgba(0, 212, 255, 0.6)), 
+                        url('https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=1050&q=80') no-repeat center center/cover;
+        }
+        #payment-container {
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            width: 360px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+        }
+        h2 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        p {
+            font-size: 1em;
+            margin: 10px 0;
+            color: #555;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #video {
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        #status {
+            margin-top: 15px;
+            font-size: 1em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="payment-container">
+        <h1>Secure Face Recognition Payment</h1>
+        <h2>Payment Confirmation</h2>
+        <p>Amount: <strong>$50.00</strong></p>
+        <button id="start-recognition">Authenticate with Face</button>
+        <video id="video" autoplay></video>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const statusElement = document.getElementById('status');
+        const startButton = document.getElementById('start-recognition');
+
+        startButton.addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    statusElement.textContent = "Scanning your face...";
+                    setTimeout(() => {
+                        statusElement.textContent = "Authentication successful! Payment completed.";
+                        stream.getTracks().forEach(track => track.stop());
+                    }, 3000);
+                })
+                .catch(err => {
+                    statusElement.textContent = "Camera access denied! Please allow camera access.";
+                    console.error("Camera error:", err);
+                });
+        });
+    </script>
+</body>
+</html>
