@@ -19,7 +19,7 @@ Under roles of your function, paste the below policy
 				"s3:GetObject"
 			],
 			"Resource": [
-				"arn:aws:s3:::cricketers-pictures/*"
+				"arn:aws:s3:::Replace-with-bucketname/*"
 			]
 		},
 		{
