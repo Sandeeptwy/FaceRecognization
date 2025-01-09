@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition User Registration</title>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1356.0.min.js"></script>
+
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, rgba(0, 128, 255, 0.6), rgba(0, 212, 255, 0.6)),
+                        url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1050&q=80') no-repeat center center/cover;
+            background-size: cover;
+        }
+        #registration-container {
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Heading Style */
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Input Styles */
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-size: 1em;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        input[type="tel"], input[type="text"], input[type="email"] {
+            color: #333;
+        }
+
+        /* Button Styles */
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        button:hover {
+            background: #45a049;
+        }
+
+        /* Video and Status Styles */
+        #video {
+            width: 100%;
+            margin-top: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        #status {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        /* Responsive Styles for smaller screens */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.6em;
+            }
+            input, button {
+                padding: 10px;
+                font-size: 1em;
+            }
+            #video {
+                margin-top: 10px;
+            }
+        }
+    </style>
+
+</head>
+<body>
+<div id="registration-container">
+    <h1>User Registration</h1>
+    <form id="registration-form">
+        <label for="username">Full Name</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+
+    </form>
+    <video id="camera" autoplay playsinline style="width: 100%; max-width: 400px;"></video>
+    <button id="capture">Capture Image</button>
+
+    <canvas id="canvas" style="display: none;"></canvas>
+    <button id="upload" disabled>Upload to S3</button>
+
+    <p id="status"></p>
+</div>
+
+
+<script>
+    const camera = document.getElementById('camera');
+    const canvas = document.getElementById('canvas');
+    const captureButton = document.getElementById('capture');
+    const uploadButton = document.getElementById('upload');
+    const userId = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    let capturedImageBlob = null;
+
+    // Configure AWS SDK
+    AWS.config.update({
+      accessKeyId: '',
+      secretAccessKey: '',
+      region: ''
+    });
+
+    const s3 = new AWS.S3();
+    const bucketName = 'face-recognition-geek';
+
+    // Start the camera
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        camera.srcObject = stream;
+      } catch (error) {
+        console.error('Error accessing the camera:', error);
+      }
+    }
+
+    // Capture image from the camera feed
+    captureButton.addEventListener('click', () => {
+      const ctx = canvas.getContext('2d');
+      canvas.width = camera.videoWidth;
+      canvas.height = camera.videoHeight;
+
+      // Draw the current frame from the video onto the canvas
+      ctx.drawImage(camera, 0, 0, canvas.width, canvas.height);
+
+      // Convert the canvas content to a Blob
+      canvas.toBlob((blob) => {
+        capturedImageBlob = blob;
+        uploadButton.disabled = false; // Enable the upload button
+        console.log('Image captured!');
+      }, 'image/png');
+    });
+
+    // Upload the captured image to S3
+    uploadButton.addEventListener('click', () => {
+      if (!capturedImageBlob) {
+        alert('No image captured!');
+        return;
+      }
+
+    // Example metadata
+    const metadata = {
+      user: document.getElementById('username').value,            // Replace with dynamic user data if needed
+      description: 'Camera upload',    // Add a description
+      timestamp: new Date().toISOString(), // Add the current timestamp
+      emailid: document.getElementById('email').value
+    };
+
+      // Define the S3 upload parameters
+      const uploadParams = {
+        Bucket: bucketName,
+        Key: `images/${Date.now()}.png`, // Unique key for the uploaded file
+        Body: capturedImageBlob,
+        ContentType: 'image/png',
+        Metadata: metadata
+      };
+
+      // Upload the image to S3
+      s3.upload(uploadParams, (err, data) => {
+        if (err) {
+          console.error('Error uploading image:', err);
+          alert(email);
+        } else {
+          console.log('Image uploaded successfully:', data.Location);
+          alert('Image uploaded successfully!');
+          document.getElementById("registration-form").reset();
+        }
+      });
+    });
+
+    // Initialize the camera
+    startCamera();
+</script>
+</body>
+</html>
