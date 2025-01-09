@@ -1,0 +1,42 @@
+Paste this code under 'code' section of the function
+change dynamodb name and replace it with your dynamodb name
+Under roles of your function, paste the below policy
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"logs:CreateLogGroup",
+				"logs:CreateLogStream",
+				"logs:PutLogEvents"
+			],
+			"Resource": "arn:aws:logs:*:*:*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"s3:GetObject"
+			],
+			"Resource": [
+				"arn:aws:s3:::cricketers-pictures/*"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"dynamodb:PutItem"
+			],
+			"Resource": [
+				"arn:aws:dynamodb:us-east-1:867344447698:table/cricketers_collection"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"rekognition:IndexFaces"
+			],
+			"Resource": "*"
+		}
+	]
+}
