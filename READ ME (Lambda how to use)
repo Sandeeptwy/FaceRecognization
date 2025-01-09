@@ -1,5 +1,5 @@
-Paste this code under 'code' section of the function
-change dynamodb name and replace it with your dynamodb name
+Paste the 'lambda.py' code under 'code' section of the function
+change dynamodb name and replace it with your dynamodb name in the 'lambda.py' code
 Under roles of your function, paste the below policy
 {
 	"Version": "2012-10-17",
