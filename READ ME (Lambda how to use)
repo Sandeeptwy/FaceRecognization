@@ -28,7 +28,7 @@ Under roles of your function, paste the below policy
 				"dynamodb:PutItem"
 			],
 			"Resource": [
-				"arn:aws:dynamodb:us-east-1:867344447698:table/cricketers_collection"
+				"arn:aws:dynamodb:us-east-1:867344447698:table/replace-with-dynamodbtablename"
 			]
 		},
 		{
